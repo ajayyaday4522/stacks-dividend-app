@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,7 +10,28 @@ interface Web3LandingPageProps {
   onGetStarted: () => void;
 }
 
-export const Web3LandingPage: React.FC<Web3LandingPageProps> = ({ onGetStarted }) => {
+const LandingPage: React.FC<Web3LandingPageProps> = ({ onGetStarted }) => {
+  // Initialize positions state
+  const [positions, setPositions] = useState<Array<{ left: string; top: string }>>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // Set isClient to true once component mounts
+    setIsClient(true);
+    
+    // Generate random positions only on client-side
+    const newPositions = Array(20).fill(0).map(() => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`
+    }));
+    setPositions(newPositions);
+  }, []);
+
+  // Only render particles when on client-side
+  if (!isClient) {
+    return null; // Return empty on server-side
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#c0c0c0] overflow-hidden relative">
       {/* Animated Background */}
@@ -32,25 +53,14 @@ export const Web3LandingPage: React.FC<Web3LandingPageProps> = ({ onGetStarted }
         </div>
 
         {/* Floating Particles */}
-        {[...Array(20)].map((_, i) => (
+        {positions.map((pos, index) => (
           <motion.div
-            key={i}
+            key={index}
             className="absolute w-2 h-2 bg-[#2ed3b7] rounded-full opacity-30"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, Math.random() * 20 - 10, 0],
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 4 + Math.random() * 4,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
+            style={pos}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
           />
         ))}
 
@@ -279,6 +289,13 @@ export const Web3LandingPage: React.FC<Web3LandingPageProps> = ({ onGetStarted }
             <p className="text-xl text-[#c0c0c0]/80 mb-10 max-w-2xl mx-auto">
               Join thousands of users who trust FinoVault for their decentralized finance needs.
             </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
             <Button
               onClick={onGetStarted}
               className="bg-gradient-to-r from-[#2ed3b7] to-[#f0b289] hover:from-[#f0b289] hover:to-[#2ed3b7] text-[#0a0a0a] font-semibold px-12 py-6 text-xl rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_40px_rgba(46,211,183,0.6)] group"
@@ -303,3 +320,5 @@ export const Web3LandingPage: React.FC<Web3LandingPageProps> = ({ onGetStarted }
     </div>
   );
 };
+
+export default LandingPage;

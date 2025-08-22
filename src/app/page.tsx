@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Web3LandingPage } from "@/components/LandingPage";
+import LandingPage from "@/components/LandingPage";
 import { Navigation } from "@/components/Navigation";
 import Sidebar from "@/components/Sidebar";
 import WalletConnection from "@/components/WalletConnection";
@@ -53,6 +53,7 @@ interface ContractStatus {
 
 // Current active section type
 type ActiveSection = "home" | "dashboard" | "market" | "profile" | "settings" | "holdings" | "admin";
+type DashboardSection = "dashboard" | "holdings" | "admin" | "settings";
 
 export default function Page() {
   // Main navigation state
@@ -61,7 +62,7 @@ export default function Page() {
 
   // Sidebar state (only for dashboard)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeSection, setActiveSection] = useState<"dashboard" | "holdings" | "admin" | "settings">("dashboard");
+  const [activeSection, setActiveSection] = useState<DashboardSection>("dashboard");
 
   // User and wallet state
   const [user, setUser] = useState<User>({ name: "Guest" });
@@ -133,10 +134,11 @@ export default function Page() {
     }
   }, [walletConnected]);
 
-  const handleNavigate = useCallback((section: string) => {
-    setCurrentPage(section as ActiveSection);
+  const handleNavigate = useCallback((section: ActiveSection) => {
+    setCurrentPage(section);
     if (section === "dashboard") {
       setShowDashboard(true);
+      setActiveSection("dashboard");
     } else {
       setShowDashboard(false);
     }
@@ -338,7 +340,7 @@ export default function Page() {
   const renderMainContent = () => {
     switch (currentPage) {
       case "home":
-        return <Web3LandingPage onGetStarted={handleGetStarted} />;
+        return <LandingPage onGetStarted={handleGetStarted} />;
       
       case "market":
         return <MarketPage />;
@@ -438,7 +440,7 @@ export default function Page() {
         ) : null;
       
       default:
-        return <Web3LandingPage onGetStarted={handleGetStarted} />;
+        return <LandingPage onGetStarted={handleGetStarted} />;
     }
   };
 
